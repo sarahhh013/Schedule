@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import './App.css'
 
 function App() {
@@ -205,8 +205,7 @@ function App() {
   }
 
   // Check coverage warnings
-  const checkCoverage = () => {
-    const schedule = generateSchedule()
+  const checkCoverage = (schedule) => {
     const warnings = []
 
     // Create timeline of coverage (in 15-minute increments)
