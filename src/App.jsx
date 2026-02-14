@@ -181,8 +181,14 @@ function App() {
       })
     })
 
-    // Update fairness history
+    return schedule
+  }
+
+  // Save fairness history for the day
+  const saveFairnessHistory = () => {
+    const schedule = generateSchedule()
     const newHistory = { ...fairnessHistory }
+
     schedule.forEach(tech => {
       if (!newHistory[tech.id]) {
         newHistory[tech.id] = { upFrontStarts: 0, productionStarts: 0 }
@@ -193,9 +199,9 @@ function App() {
         newHistory[tech.id].productionStarts++
       }
     })
-    setFairnessHistory(newHistory)
 
-    return schedule
+    setFairnessHistory(newHistory)
+    alert('Schedule saved! Fairness tracking updated.')
   }
 
   // Check coverage warnings
@@ -428,6 +434,9 @@ function App() {
                 ))}
               </tbody>
             </table>
+            <button onClick={saveFairnessHistory} className="save-schedule-btn">
+              Save Schedule & Update Fairness Tracking
+            </button>
           </div>
         )}
       </div>
