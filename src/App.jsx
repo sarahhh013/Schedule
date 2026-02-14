@@ -101,11 +101,24 @@ function App() {
     return hours * 60 + minutes
   }
 
-  // Convert minutes to time string
+  // Convert minutes to time string (12-hour format)
   const minutesToTime = (minutes) => {
     const hours = Math.floor(minutes / 60)
     const mins = minutes % 60
-    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`
+    const period = hours >= 12 ? 'PM' : 'AM'
+    const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours
+    const displayMins = mins.toString().padStart(2, '0')
+    return `${displayHours}:${displayMins} ${period}`
+  }
+
+  // Round minutes to nearest 30-minute increment
+  const roundToHalfHour = (minutes) => {
+    const remainder = minutes % 30
+    if (remainder <= 15) {
+      return minutes - remainder
+    } else {
+      return minutes + (30 - remainder)
+    }
   }
 
   // Calculate midpoint, lunch, and switch times
@@ -114,14 +127,25 @@ function App() {
     const end = timeToMinutes(endTime)
     const totalMinutes = end - start
     const midpoint = start + Math.floor(totalMinutes / 2)
-    const lunchStart = midpoint - 30
-    const lunchEnd = midpoint
+
+    // Round lunch start to nearest 30-minute increment
+    let lunchStart = roundToHalfHour(midpoint - 30)
+
+    // Special rule: 7 AM shifts get lunch at 11:00 AM at the latest
+    if (start === 7 * 60) { // 7 AM
+      const elevenAM = 11 * 60
+      if (lunchStart > elevenAM) {
+        lunchStart = elevenAM
+      }
+    }
+
+    const lunchEnd = lunchStart + 30
 
     return {
-      midpoint,
+      midpoint: lunchEnd,
       lunchStart,
       lunchEnd,
-      switchTime: midpoint
+      switchTime: lunchEnd
     }
   }
 
