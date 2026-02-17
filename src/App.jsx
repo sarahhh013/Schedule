@@ -115,28 +115,48 @@ function App() {
       timeToMinutes(a.startTime) - timeToMinutes(b.startTime)
     )
 
-    return sorted.map((tech, index) => {
+    const n = sorted.length
+
+    // First tech always Up Front. For the rest, use 2:1 ratio.
+    // Total UF slots = ceil(n * 2/3), Prod slots = floor(n * 1/3)
+    const totalUF = Math.ceil(n * 2 / 3)
+    const totalProd = n - totalUF
+
+    // The first tech is locked to Up Front. Distribute remaining slots.
+    const remainingUF = totalUF - 1   // already used 1 UF slot for first tech
+    const remainingProd = totalProd
+
+    // Sort remaining techs by UF deficit: those with fewer UF starts get UF priority
+    const remaining = sorted.slice(1).map(tech => ({
+      tech,
+      history: fairnessHistory[tech.id] || { upFrontStarts: 0, productionStarts: 0 }
+    }))
+
+    // Score: lower score = more deserving of Up Front (has done it less)
+    remaining.sort((a, b) => {
+      const aTotal = a.history.upFrontStarts + a.history.productionStarts
+      const bTotal = b.history.upFrontStarts + b.history.productionStarts
+      const aRatio = aTotal === 0 ? 0 : a.history.upFrontStarts / aTotal
+      const bRatio = bTotal === 0 ? 0 : b.history.upFrontStarts / bTotal
+      return aRatio - bRatio  // ascending: lowest UF ratio gets UF slot first
+    })
+
+    // Assign positions: first remainingUF get Up Front, rest get Production
+    const positionMap = {}
+    remaining.forEach((item, i) => {
+      positionMap[item.tech.id] = i < remainingUF ? 'Up Front' : 'Production'
+    })
+
+    return sorted.map((tech) => {
       const startMin = timeToMinutes(tech.startTime)
       const endMin = timeToMinutes(tech.endTime)
       const lunchStartMin = calcLunchStart(startMin, endMin)
       const lunchEndMin = lunchStartMin + 30
       const switchMin = lunchEndMin
 
-      const history = fairnessHistory[tech.id] || { upFrontStarts: 0, productionStarts: 0 }
-      let startPosition
-
-      if (index === 0) {
-        startPosition = 'Up Front'
-      } else {
-        const patternIndex = index % 3
-        if (patternIndex === 2) {
-          startPosition = 'Production'
-        } else {
-          const total = history.upFrontStarts + history.productionStarts
-          const upFrontRatio = total === 0 ? 0 : history.upFrontStarts / total
-          startPosition = (upFrontRatio > 0.7 && index > 1) ? 'Production' : 'Up Front'
-        }
-      }
+      const startPosition = sorted[0].id === tech.id
+        ? 'Up Front'
+        : positionMap[tech.id]
 
       return {
         ...tech,
