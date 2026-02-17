@@ -128,13 +128,30 @@ function App() {
     const totalMinutes = end - start
     const midpoint = start + Math.floor(totalMinutes / 2)
 
-    // Round lunch start to nearest 30-minute increment
-    let lunchStart = roundToHalfHour(midpoint - 30)
+    // Calculate ideal lunch start (30 min before midpoint), rounded to nearest :00 or :30
+    // Allow :15 only if midpoint falls exactly there and rounding would push too far
+    const rawLunchStart = midpoint - 30
+    const remainder = rawLunchStart % 30
+    let lunchStart
 
-    // Special rule: 7 AM shifts get lunch at 11:00 AM at the latest
-    if (start === 7 * 60) { // 7 AM
+    if (remainder === 0) {
+      // Already on a :00 or :30
+      lunchStart = rawLunchStart
+    } else if (remainder <= 7) {
+      // Very close to :00 — round down
+      lunchStart = rawLunchStart - remainder
+    } else if (remainder >= 23) {
+      // Very close to :30 — round up
+      lunchStart = rawLunchStart + (30 - remainder)
+    } else {
+      // In between — use :15 as acceptable fallback if it's closer to midpoint logic
+      lunchStart = rawLunchStart - remainder + 15
+    }
+
+    // For 7 AM starters: 11:00 AM is the EARLIEST allowed lunch
+    if (start === 7 * 60) {
       const elevenAM = 11 * 60
-      if (lunchStart > elevenAM) {
+      if (lunchStart < elevenAM) {
         lunchStart = elevenAM
       }
     }

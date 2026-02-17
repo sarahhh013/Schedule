@@ -1,16 +1,22 @@
 .app {
   min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for iPhone */
   background-color: #f5f5f5;
+  padding-bottom: env(safe-area-inset-bottom); /* iPhone home bar */
 }
 
 .header {
   background-color: #2563eb;
   color: white;
   padding: 1rem 2rem;
+  padding-top: calc(1rem + env(safe-area-inset-top)); /* iPhone Dynamic Island */
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .header h1 {
@@ -266,14 +272,20 @@
   background-color: #1d4ed8;
 }
 
-/* Mobile responsive styles */
+/* Mobile responsive styles - optimized for iPhone 15 (393px) */
 @media (max-width: 768px) {
   .header {
-    padding: 1rem;
+    padding: 0.875rem 1rem;
+    padding-top: calc(0.875rem + env(safe-area-inset-top));
   }
 
   .header h1 {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
+  }
+
+  .header button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
   }
 
   .roster-manager,
@@ -288,6 +300,14 @@
 
   .add-tech input {
     width: 100%;
+    font-size: 1rem; /* Prevents iOS zoom on focus */
+    padding: 0.625rem;
+  }
+
+  .add-tech button {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
   }
 
   .roster-item {
@@ -296,22 +316,55 @@
     gap: 0.5rem;
   }
 
+  .roster-item button {
+    width: 100%;
+    padding: 0.625rem;
+  }
+
   .tech-selector {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 0.75rem;
+  }
+
+  .tech-checkbox {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 1rem;
+    min-height: 48px; /* iOS touch target minimum */
+  }
+
+  .tech-checkbox input[type="checkbox"] {
+    width: 1.5rem;
+    height: 1.5rem;
   }
 
   .tech-adjustment {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.5rem;
   }
 
   .tech-name {
     min-width: auto;
+    font-size: 1rem;
+    font-weight: 600;
   }
 
   .tech-adjustment input[type="time"] {
     width: 100%;
+    font-size: 1rem; /* Prevents iOS zoom on focus */
+    padding: 0.625rem;
+    min-height: 44px; /* iOS touch target */
+  }
+
+  .callout-btn {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    min-height: 44px;
   }
 
   .schedule-grid {
